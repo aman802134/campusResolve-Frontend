@@ -1,5 +1,5 @@
-import { Badge } from "./ui/badge";
-import { Card, CardContent } from "./ui/card";
+import { Badge } from "../ui/badge";
+import { Card, CardContent } from "../ui/card";
 import { CiClock2 } from "react-icons/ci";
 
 export default function AutomatedEscalationSystem() {

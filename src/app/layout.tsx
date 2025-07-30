@@ -1,3 +1,4 @@
+import NProgressLoader from "@/utils/loader";
 import "./globals.css";
 
 export const metadata = {
@@ -13,8 +14,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <NProgressLoader />
         {children}
       </body>
     </html>
   );
-} 
+}

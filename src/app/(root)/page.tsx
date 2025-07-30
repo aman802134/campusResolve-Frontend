@@ -1,8 +1,8 @@
-import AutomatedEscalationSystem from "@/components/automated-escalation-system";
-import EverythingAboutUs from "@/components/evreything-about-us";
-import HeroSection from "@/components/hero-section";
-import SubscribeToJoin from "@/components/subscribe-to-join";
-import ThreeStepProcess from "@/components/three-step-process";
+import AutomatedEscalationSystem from "@/components/root/automated-escalation-system";
+import EverythingAboutUs from "@/components/root/evreything-about-us";
+import HeroSection from "@/components/root/hero-section";
+import SubscribeToJoin from "@/components/root/subscribe-to-join";
+import ThreeStepProcess from "@/components/root/three-step-process";
 
 export default function Home() {
   return (
