@@ -1,4 +1,4 @@
-import { performLogout, triggerLoginPopup } from "../context/auth-utils";
+import { performLogout } from "../context/auth-utils";
 import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from "axios";
 
 export const API_CONFIG: AxiosRequestConfig = {
@@ -42,7 +42,8 @@ axiosInstance.interceptors.response.use(
     // If it's still 401 after retry, or any other error, handle logout
     if (error.response?.status === 401) {
       performLogout();
-      triggerLoginPopup();
+      // triggerLoginPopup();
+      window.location.href = "/auth/login";
     }
 
     return Promise.reject(error);

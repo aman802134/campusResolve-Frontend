@@ -39,7 +39,7 @@ const LoginForm = () => {
   });
   const { mutate, isError, error, isSuccess, data, isPending } = useLoginUser();
   const router = useRouter();
-
+  console.log("after login : ", data);
   React.useEffect(() => {
     if (isSuccess && data) {
       toast.success(data.message || "Login successful!");
