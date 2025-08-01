@@ -11,7 +11,7 @@ export interface RegisterType {
   department?: string; // optional, based on requested role
   phone?: string;
   gender?: GENDER;
-  avatarUrl?: string; // optional, can be uploaded later
+  avatarUrl?: File | string; // optional, can be File for upload or string for URL
 }
 export interface RequestedRoleType {
   requestedRole: USER_ROLES; // optional, can be used to request a different role

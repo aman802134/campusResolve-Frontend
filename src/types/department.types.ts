@@ -10,6 +10,10 @@ export type UpdateDepartmentPayload = {
   adminId?: string;
   domain?: string[]; // optional and replaces the domains array if provided
 };
+export type updateDomainPayload = {
+  departmentId: string;
+  domain: { domain: string[] }; // e.g. { domain: ['hostel','kitchen'] }
+};
 export type DepartmentResponse = {
   id: string;
   name: string;

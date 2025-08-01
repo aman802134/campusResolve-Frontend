@@ -3,13 +3,17 @@ import { CreateCampusPayload, UpdateCampusPayload } from "@/types/campus.types";
 
 export const campusService = {
   // Create a new campus (Super Admin only)
-  createCampus: (campusData: CreateCampusPayload) => 
+  createCampus: (campusData: CreateCampusPayload) =>
     ApiClient.post("/campus/create-campus", campusData),
 
   // Get all campuses
   getAllCampuses: () => ApiClient.get("/campus/all-campus"),
+  
+  // Get a specific campus by ID
+  getCampusById: (campusId: string) =>
+    ApiClient.get(`/campus/get-campus/${campusId}`),
 
   // Update campus (Super Admin or Campus Admin only)
-  updateCampus: (campusId: string, campusData: UpdateCampusPayload) => 
+  updateCampus: (campusId: string, campusData: UpdateCampusPayload) =>
     ApiClient.patch(`/campus/update-campus/${campusId}`, campusData),
 };

@@ -1,13 +1,8 @@
-import axios from "axios";
 import { performLogout, triggerLoginPopup } from "../context/auth-utils";
-
-// Type definitions for Axios v1.11.0
-type AxiosRequestConfig = any;
-type AxiosError = any;
-type AxiosResponse = any;
+import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from "axios";
 
 export const API_CONFIG: AxiosRequestConfig = {
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -30,12 +25,14 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as any;
+    const originalRequest = error.config as AxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     // If it's a 401 error and we haven't retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       // For now, just retry the request once
       // Your backend should handle token validation using the httpOnly cookies
       // If the refreshToken is valid, it should set a new accessToken cookie

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
 import {
   Select,
   SelectContent,
@@ -21,9 +23,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { GraduationCap, Mail, Lock, User, Phone, Building } from "lucide-react";
+import { GraduationCap, Mail, Lock, User, Phone } from "lucide-react";
 import { registerSchema } from "@/validations/auth-schema.validation";
 import React from "react";
+import { useCreateUser } from "@/lib/hooks/tanstack-querry-hooks";
+import { useCampuses } from "@/lib/hooks/tanstack-querry-hooks";
+import { useDepartments } from "@/lib/hooks/tanstack-querry-hooks";
+import toast from "react-hot-toast";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -34,27 +40,127 @@ const RegisterForm = () => {
       name: "",
       email: "",
       password: "",
-      requestedRole: undefined,
       campus: "",
       department: "",
       phone: "",
       gender: undefined,
-      avatarUrl: "",
     },
   });
 
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
+  const { mutate, isError, error, isSuccess, data, isPending } =
+    useCreateUser();
+  const { data: campuses, isLoading: campusesLoading } = useCampuses();
+  const { data: departments, isLoading: departmentsLoading } = useDepartments();
+  const router = useRouter();
 
-  const onSubmit = (values: RegisterFormData) => {
-    console.log("Register values:", values);
+  // Handle success and error cases with toast
+  React.useEffect(() => {
+    if (isSuccess && data) {
+      toast.success(data.message || "Registration successful!");
+
+      // Clear the form after successful registration
+      form.reset({
+        name: "",
+        email: "",
+        password: "",
+        campus: "",
+        department: "",
+        phone: "",
+        gender: undefined,
+      });
+
+      // Clear the avatar preview
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+        setAvatarPreview(null);
+      }
+
+      // Optionally redirect to login page
+    }
+  }, [isSuccess, data, form, avatarPreview]);
+
+  React.useEffect(() => {
+    if (isError && error) {
+      // Handle different types of errors
+      if (error.message) {
+        toast.error(error.message);
+      } else if (
+        (error as any).errors &&
+        Array.isArray((error as any).errors)
+      ) {
+        // Show validation errors
+        (error as any).errors.forEach((err: any) => {
+          toast.error(`${err.field}: ${err.message}`);
+        });
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
+    }
+  }, [isError, error]);
+
+  // Cleanup object URL when component unmounts or preview changes
+  React.useEffect(() => {
+    return () => {
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
+
+  const onSubmit = async (values: RegisterFormData) => {
+    const formData = new FormData();
+    formData.append("name", values.name);
+    formData.append("email", values.email);
+    formData.append("password", values.password);
+    formData.append("campus", values.campus ?? "");
+    formData.append("department", values.department ?? "");
+    formData.append("phone", values.phone ?? "");
+    formData.append("gender", values.gender ?? "");
+
+    // Append the file if it exists
+    if (values.avatarUrl) {
+      formData.append("avatarUrl", values.avatarUrl);
+    }
+
+    // Show loading toast
+    const loadingToast = toast.loading("Creating your account...");
+
+    mutate(formData, {
+      onSuccess: () => {
+        toast.dismiss(loadingToast);
+        router.push("/login");
+      },
+      onError: () => {
+        toast.dismiss(loadingToast);
+      },
+    });
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        alert("File size must be less than 5MB");
+        return;
+      }
+
+      // Clean up previous object URL
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+
+      form.setValue("avatarUrl", file);
       const url = URL.createObjectURL(file);
       setAvatarPreview(url);
-      form.setValue("avatarUrl", url); // or handle file upload here
     }
   };
 
@@ -113,50 +219,41 @@ const RegisterForm = () => {
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="requestedRole">Requested Role (Optional)</Label>
-                <Select
-                  value={form.watch("requestedRole")}
-                  onValueChange={(value) =>
-                    form.setValue(
-                      "requestedRole",
-                      value as RegisterFormData["requestedRole"]
-                    )
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Request different role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="student">Student</SelectItem>
-                    <SelectItem value="faculty_academic">
-                      Faculty Academic
-                    </SelectItem>
-                    <SelectItem value="faculty_non_academic">
-                      Faculty Non-Academic
-                    </SelectItem>
-                    <SelectItem value="department_admin">
-                      Department Admin
-                    </SelectItem>
-                    <SelectItem value="campus_admin">Campus Admin</SelectItem>
-                    <SelectItem value="super_admin">Super Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="grid md:grid-cols-2 gap-4">
                 {/* Campus */}
                 <div className="space-y-2">
                   <Label htmlFor="campus">Campus</Label>
-                  <div className="relative">
-                    <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      {...form.register("campus")}
-                      id="campus"
-                      placeholder="Main Campus"
-                      className="pl-10"
-                    />
-                  </div>
+                  <Select
+                    value={form.watch("campus")}
+                    onValueChange={(value) => form.setValue("campus", value)}
+                    disabled={campusesLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          campusesLoading
+                            ? "Loading campuses..."
+                            : "Select campus"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray((campuses?.data as any)?.data) ? (
+                        (campuses?.data as any)?.data.map((campus: any) => (
+                          <SelectItem
+                            key={campus._id || campus.id}
+                            value={campus._id || campus.id}
+                          >
+                            {campus.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="no-campuses" disabled>
+                          No campuses available
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Department */}
@@ -167,27 +264,34 @@ const RegisterForm = () => {
                     onValueChange={(value) =>
                       form.setValue("department", value)
                     }
+                    disabled={departmentsLoading}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select department" />
+                      <SelectValue
+                        placeholder={
+                          departmentsLoading
+                            ? "Loading departments..."
+                            : "Select department"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="computer_science">
-                        Computer Science
-                      </SelectItem>
-                      <SelectItem value="engineering">Engineering</SelectItem>
-                      <SelectItem value="business">Business</SelectItem>
-                      <SelectItem value="arts">Arts & Sciences</SelectItem>
-                      <SelectItem value="medicine">Medicine</SelectItem>
-                      <SelectItem value="law">Law</SelectItem>
-                      <SelectItem value="education">Education</SelectItem>
-                      <SelectItem value="administration">
-                        Administration
-                      </SelectItem>
-                      <SelectItem value="maintenance">Maintenance</SelectItem>
-                      <SelectItem value="security">Security</SelectItem>
-                      <SelectItem value="library">Library</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      {Array.isArray((departments?.data as any)?.data) ? (
+                        (departments?.data as any)?.data.map(
+                          (department: any) => (
+                            <SelectItem
+                              key={department._id || department.id}
+                              value={department._id || department.id}
+                            >
+                              {department.name}
+                            </SelectItem>
+                          )
+                        )
+                      ) : (
+                        <SelectItem value="no-departments" disabled>
+                          No departments available
+                        </SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -234,9 +338,7 @@ const RegisterForm = () => {
 
               {/* Avatar URL */}
               <div className="space-y-2">
-                <Label htmlFor="avatarUrl">
-                  Profile Picture URL (Optional)
-                </Label>
+                <Label htmlFor="avatarUrl">Profile Picture (Optional)</Label>
                 <div className="relative">
                   {avatarPreview && (
                     <Image
@@ -248,11 +350,12 @@ const RegisterForm = () => {
                     />
                   )}
                   <Input
-                    id="avatarUrl"
-                    placeholder="https://example.com/your-photo.jpg"
-                    className="pl-10"
-                    onChange={handleAvatarChange}
                     type="file"
+                    id="avatarUrl"
+                    onChange={handleAvatarChange}
+                    accept="image/*"
+                    placeholder="Upload your profile picture"
+                    className="pl-10"
                   />
                 </div>
               </div>
@@ -305,8 +408,9 @@ const RegisterForm = () => {
                 type="submit"
                 variant="secondary"
                 className="w-full gradient text-white hover:opacity-90 transition-colors cursor-pointer"
+                disabled={isPending}
               >
-                Create Account
+                {isPending ? "Creating Account..." : "Create Account"}
               </Button>
             </form>
 

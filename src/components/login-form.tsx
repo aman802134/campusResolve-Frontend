@@ -24,6 +24,10 @@ import {
 
 // 🧠 Import your zod schema and type from validation/types folder
 import { loginSchema } from "@/validations/auth-schema.validation";
+import { useLoginUser } from "@/lib/hooks/tanstack-querry-hooks";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 const LoginForm = () => {
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -33,10 +37,52 @@ const LoginForm = () => {
       password: "",
     },
   });
+  const { mutate, isError, error, isSuccess, data, isPending } = useLoginUser();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (isSuccess && data) {
+      toast.success(data.message || "Login successful!");
+
+      // Clear the form after successful registration
+      form.reset({
+        email: "",
+        password: "",
+      });
+    }
+  }, [isSuccess, data, form]);
+
+  React.useEffect(() => {
+    if (isError && error) {
+      // Handle different types of errors
+      if (error.message) {
+        toast.error(error.message);
+      } else if (
+        (error as any).errors &&
+        Array.isArray((error as any).errors)
+      ) {
+        // Show validation errors
+        (error as any).errors.forEach((err: any) => {
+          toast.error(`${err.field}: ${err.message}`);
+        });
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
+    }
+  }, [isError, error]);
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
-    console.log("Login values", values);
-    // 🔒 Call your backend /api/v1/auth/login endpoint here
+    const loadingToast = toast.loading("Loging in your account...");
+
+    mutate(values, {
+      onSuccess: () => {
+        toast.dismiss(loadingToast);
+        router.push("/");
+      },
+      onError: () => {
+        toast.dismiss(loadingToast);
+      },
+    });
   };
 
   return (

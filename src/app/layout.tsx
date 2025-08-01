@@ -1,5 +1,6 @@
 import NProgressLoader from "@/utils/loader";
 import "./globals.css";
+import Providers from "./provider";
 
 export const metadata = {
   title: "Campus Resolve",
@@ -15,7 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <NProgressLoader />
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

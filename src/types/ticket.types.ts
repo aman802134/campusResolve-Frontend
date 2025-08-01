@@ -1,4 +1,4 @@
-import { PRIORITY, TICKET_STATUS } from './enums';
+import { PRIORITY, TICKET_STATUS } from "./enums";
 
 export type CreateTicketPayload = {
   title: string;
@@ -16,6 +16,15 @@ export type UpdateTicketPayload = {
   assignedToId?: string; // User._id
   comment?: string; // Optional note for history
   escalated?: boolean;
+};
+export type ApiResponse<T> = {
+  success?: boolean; // For admin updates
+  message: string;
+  data: T;
+};
+export type UpdateTicketArgs = {
+  ticketId: string;
+  updateData: UpdateTicketPayload;
 };
 
 export type TicketResponse = {

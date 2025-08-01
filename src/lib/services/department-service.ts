@@ -1,15 +1,18 @@
 import { ApiClient } from "../api/api-client";
-import { CreateDepartmentPayload, UpdateDepartmentPayload } from "@/types/department.types";
+import { CreateDepartmentPayload } from "@/types/department.types";
 
 export const departmentService = {
   // Create a new department (Super Admin only)
-  createDepartment: (departmentData: CreateDepartmentPayload) => 
-    ApiClient.post("/departments/create-department", departmentData),
+  createDepartment: (departmentData: CreateDepartmentPayload) =>
+    ApiClient.post("/department/create-department", departmentData),
 
   // Get all departments
-  getDepartments: () => ApiClient.get("/departments/get-departments"),
-
+  getDepartments: () => ApiClient.get("/department/get-departments"),
+  
+  // Get a specific department by ID
+  getDepartmentById: (departmentId: string) =>
+    ApiClient.get(`/department/get-department/${departmentId}`),
   // Update department domain (Super Admin or Campus Admin only)
-  updateDomain: (departmentId: string, domainData: { domain: string[] }) => 
-    ApiClient.patch(`/departments/${departmentId}/domain`, domainData),
+  updateDomain: (departmentId: string, domain: { domain: string[] }) =>
+    ApiClient.patch(`/department/${departmentId}/domain`, domain),
 };
