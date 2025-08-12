@@ -10,6 +10,8 @@ export const GenderEnum = z.enum(GENDER);
 export const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
+  // Removed requestedRole – role is now inferred from verification
+  externalId: z.string().min(1, "Verification ID is required"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   campus: z.string().min(1, "Campus is required"), // should be an ObjectId string
   department: z.string().optional(), // required conditionally

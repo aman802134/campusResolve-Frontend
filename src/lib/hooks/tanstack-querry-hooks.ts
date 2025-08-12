@@ -2,22 +2,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "../services/user-service";
 import { ticketService } from "../services/ticket-service";
-
-import {
-  ApiResponse,
-  UpdateTicketArgs,
-  UpdateTicketPayload,
-} from "@/types/ticket.types";
+import { UpdateTicketArgs, UpdateTicketPayload } from "@/types/ticket.types";
 import { departmentService } from "../services/department-service";
 import { updateDomainPayload } from "@/types/department.types";
 import { campusService } from "../services/campus-service";
 import { CreateCampusPayload } from "@/types/campus.types";
-import { User } from "@/types/auth.payload";
+import { User, ApiResponse } from "@/types/auth.payload";
 
 export const queryKeys = {
   users: {
     list: () => ["users", "list"],
     detail: (id: string) => ["users", "detail", id],
+    me: () => ["me", "detail"],
   },
   tickets: {
     list: () => ["tickets", "list"],
@@ -69,13 +65,31 @@ export const useLoginUser = () => {
     },
   });
 };
+export const useRefresh = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: userService.refresh,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+    },
+  });
+};
+export const useMe = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: userService.me,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
+    },
+  });
+};
 export const useLogoutUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: userService.logout,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.list() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
     },
   });
 };

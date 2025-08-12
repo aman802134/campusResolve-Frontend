@@ -2,11 +2,11 @@ import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from "axios";
 import { axiosInstance } from "./axios-config";
 
 // --- General API response structure ---
-interface ApiResponse<T> {
-  data: T;
+export type ApiResponse<T> = {
   status: number;
   message: string;
-}
+  data: T;
+};
 
 // --- Error shape from backend ---
 interface ServerErrorResponse {
@@ -55,12 +55,13 @@ export class ApiClient {
       if (data instanceof FormData) {
         // Create a temporary axios instance without default headers for FormData
         const tempAxios = axios.create({
-          baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1",
+          baseURL:
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1",
           timeout: 30000,
           withCredentials: true,
           // Don't set default Content-Type for FormData
         });
-        
+
         response = await tempAxios.request<T>({
           method,
           url,

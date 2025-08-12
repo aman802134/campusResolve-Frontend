@@ -30,6 +30,7 @@ import { useCreateUser } from "@/lib/hooks/tanstack-querry-hooks";
 import { useCampuses } from "@/lib/hooks/tanstack-querry-hooks";
 import { useDepartments } from "@/lib/hooks/tanstack-querry-hooks";
 import toast from "react-hot-toast";
+import { ValidationErrorResponse } from "@/types/error.types";
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
@@ -39,6 +40,7 @@ const RegisterForm = () => {
     defaultValues: {
       name: "",
       email: "",
+      externalId: "",
       password: "",
       campus: "",
       department: "",
@@ -54,51 +56,6 @@ const RegisterForm = () => {
   const { data: departments, isLoading: departmentsLoading } = useDepartments();
   const router = useRouter();
 
-  // Handle success and error cases with toast
-  React.useEffect(() => {
-    if (isSuccess && data) {
-      toast.success(data.message || "Registration successful!");
-
-      // Clear the form after successful registration
-      form.reset({
-        name: "",
-        email: "",
-        password: "",
-        campus: "",
-        department: "",
-        phone: "",
-        gender: undefined,
-      });
-
-      // Clear the avatar preview
-      if (avatarPreview) {
-        URL.revokeObjectURL(avatarPreview);
-        setAvatarPreview(null);
-      }
-
-      // Optionally redirect to login page
-    }
-  }, [isSuccess, data, form, avatarPreview]);
-
-  React.useEffect(() => {
-    if (isError && error) {
-      // Handle different types of errors
-      if (error.message) {
-        toast.error(error.message);
-      } else if (
-        (error as any).errors &&
-        Array.isArray((error as any).errors)
-      ) {
-        // Show validation errors
-        (error as any).errors.forEach((err: any) => {
-          toast.error(`${err.field}: ${err.message}`);
-        });
-      } else {
-        toast.error("Registration failed. Please try again.");
-      }
-    }
-  }, [isError, error]);
-
   // Cleanup object URL when component unmounts or preview changes
   React.useEffect(() => {
     return () => {
@@ -112,6 +69,7 @@ const RegisterForm = () => {
     const formData = new FormData();
     formData.append("name", values.name);
     formData.append("email", values.email);
+    formData.append("externalId", values.externalId);
     formData.append("password", values.password);
     formData.append("campus", values.campus ?? "");
     formData.append("department", values.department ?? "");
@@ -122,10 +80,8 @@ const RegisterForm = () => {
     if (values.avatarUrl) {
       formData.append("avatarUrl", values.avatarUrl);
     }
-
     // Show loading toast
     const loadingToast = toast.loading("Creating your account...");
-
     mutate(formData, {
       onSuccess: () => {
         toast.dismiss(loadingToast);
@@ -145,25 +101,69 @@ const RegisterForm = () => {
         alert("Please select an image file");
         return;
       }
-
       // Validate file size (max 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
         alert("File size must be less than 5MB");
         return;
       }
-
       // Clean up previous object URL
       if (avatarPreview) {
         URL.revokeObjectURL(avatarPreview);
       }
-
       form.setValue("avatarUrl", file);
       const url = URL.createObjectURL(file);
       setAvatarPreview(url);
     }
   };
+  // Handle success and error cases with toast
+  React.useEffect(() => {
+    if (isSuccess && data) {
+      toast.success(data.message || "Registration successful!");
+      // Clear the form after successful registration
+      form.reset({
+        name: "",
+        email: "",
+        externalId: "",
+        password: "",
+        campus: "",
+        department: "",
+        phone: "",
+        gender: undefined,
+      });
 
+      // Clear the avatar preview
+      if (avatarPreview) {
+        URL.revokeObjectURL(avatarPreview);
+        setAvatarPreview(null);
+      }
+      // Optionally redirect to login page
+    }
+  }, [isSuccess, data, form, avatarPreview]);
+
+  React.useEffect(() => {
+    if (isError && error) {
+      // Case 1: Standard Error with message
+      if (error instanceof Error && error.message) {
+        toast.error(error.message);
+
+        // Case 2: API validation errors
+      } else if (
+        typeof error === "object" &&
+        error !== null &&
+        "errors" in error &&
+        Array.isArray((error as ValidationErrorResponse).errors)
+      ) {
+        (error as ValidationErrorResponse).errors.forEach((err) => {
+          toast.error(`${err.field}: ${err.message}`);
+        });
+
+        // Case 3: Fallback
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
+    }
+  }, [isError, error]);
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-accent/10  flex items-center justify-center p-4">
       <div className="w-full max-w-2xl animate-fade-in">
@@ -214,6 +214,19 @@ const RegisterForm = () => {
                       {...form.register("email")}
                       id="email"
                       placeholder="your.email@university.edu"
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="externalId">External-Id</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      {...form.register("externalId")}
+                      id="externalId"
+                      placeholder="QVC-STU009 or QVC-FAC001"
                       className="pl-10"
                     />
                   </div>

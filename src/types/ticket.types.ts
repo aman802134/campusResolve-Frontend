@@ -17,11 +17,6 @@ export type UpdateTicketPayload = {
   comment?: string; // Optional note for history
   escalated?: boolean;
 };
-export type ApiResponse<T> = {
-  success?: boolean; // For admin updates
-  message: string;
-  data: T;
-};
 export type UpdateTicketArgs = {
   ticketId: string;
   updateData: UpdateTicketPayload;

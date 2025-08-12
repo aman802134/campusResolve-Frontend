@@ -28,6 +28,9 @@ import { useLoginUser } from "@/lib/hooks/tanstack-querry-hooks";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { useAuth } from "@/lib/context/auth-context";
+import { RedirectByRole } from "@/utils/redirect-by-role";
+import { ValidationErrorResponse } from "@/types/error.types";
 
 const LoginForm = () => {
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -37,9 +40,12 @@ const LoginForm = () => {
       password: "",
     },
   });
-  const { mutate, isError, error, isSuccess, data, isPending } = useLoginUser();
+
+  const { mutate, isError, error, isSuccess, data } = useLoginUser();
+  const { login } = useAuth();
   const router = useRouter();
-  console.log("after login : ", data);
+  console.log("after login : ", data?.data.user.role);
+
   React.useEffect(() => {
     if (isSuccess && data) {
       toast.success(data.message || "Login successful!");
@@ -54,17 +60,22 @@ const LoginForm = () => {
 
   React.useEffect(() => {
     if (isError && error) {
-      // Handle different types of errors
-      if (error.message) {
+      // Case 1: Standard Error with message
+      if (error instanceof Error && error.message) {
         toast.error(error.message);
+
+        // Case 2: API validation errors
       } else if (
-        (error as any).errors &&
-        Array.isArray((error as any).errors)
+        typeof error === "object" &&
+        error !== null &&
+        "errors" in error &&
+        Array.isArray((error as ValidationErrorResponse).errors)
       ) {
-        // Show validation errors
-        (error as any).errors.forEach((err: any) => {
+        (error as ValidationErrorResponse).errors.forEach((err) => {
           toast.error(`${err.field}: ${err.message}`);
         });
+
+        // Case 3: Fallback
       } else {
         toast.error("Registration failed. Please try again.");
       }
@@ -73,11 +84,12 @@ const LoginForm = () => {
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
     const loadingToast = toast.loading("Loging in your account...");
-
     mutate(values, {
-      onSuccess: () => {
+      onSuccess: (response) => {
         toast.dismiss(loadingToast);
-        router.push("/");
+        console.log("don't worry reponse got form login form");
+        login(response?.data);
+        RedirectByRole(response?.data?.user?.role, router);
       },
       onError: () => {
         toast.dismiss(loadingToast);

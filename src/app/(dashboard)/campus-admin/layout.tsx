@@ -1,4 +1,3 @@
-// import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 const geistSans = Geist({
@@ -11,16 +10,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function DashboardLayout({
+export default function SuperAdminDashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <>
-      <main>
+      <main className="w-full h-full flex gap-1">
         <div
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased flex-1`}
         >
           {children}
         </div>
