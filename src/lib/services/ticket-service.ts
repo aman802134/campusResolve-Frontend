@@ -1,9 +1,6 @@
+import { ApiResponse } from "@/types/auth.payload";
 import { ApiClient } from "../api/api-client";
-import {
-  ApiResponse,
-  CreateTicketPayload,
-  UpdateTicketPayload,
-} from "@/types/ticket.types";
+import { CreateTicketPayload, UpdateTicketPayload } from "@/types/ticket.types";
 
 export const ticketService = {
   // Create a new ticket

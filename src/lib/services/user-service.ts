@@ -13,11 +13,22 @@ export const userService = {
   register: async (userData: FormData): Promise<ApiResponse<User>> =>
     ApiClient.post("/auth/register", userData),
 
-  login: (credentials: LoginType): Promise<ApiResponse<AuthResponse>> =>
-    ApiClient.post("/auth/login", credentials),
-  refresh: (): Promise<ApiResponse<AuthResponse>> =>
-    ApiClient.post("/auth/refreshToken"),
-  me: (): Promise<ApiResponse<User>> => ApiClient.get("/auth/me"),
+  login: async (credentials: LoginType): Promise<AuthResponse> => {
+    const res = await ApiClient.post<AuthResponse>("/auth/login", credentials);
+    console.log("response getting from the userService", res.data);
+    return res.data; // unwrap Axios response
+  },
+
+  refresh: async (): Promise<AuthResponse> => {
+    const res = await ApiClient.post<AuthResponse>("/auth/refreshToken");
+    return res.data; // Direct AuthResponse
+  },
+
+  me: async (): Promise<ApiResponse<User>> => {
+    const res = await ApiClient.get<ApiResponse<User>>("/auth/me");
+    return res.data; // Wrapped response
+  },
+
   logout: () => ApiClient.post("/auth/logout"),
 
   // User management endpoints

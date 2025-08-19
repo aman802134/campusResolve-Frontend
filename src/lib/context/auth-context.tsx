@@ -1,10 +1,5 @@
 // context/AuthContext.tsx
-import {
-  ApiResponse,
-  AuthContextType,
-  AuthResponse,
-  User,
-} from "@/types/auth.payload";
+import { AuthContextType, AuthResponse, User } from "@/types/auth.payload";
 import React, {
   createContext,
   useContext,
@@ -26,23 +21,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(userData.user);
     setLoading(false);
   };
-  const fetchUser: () => Promise<void> = useCallback(async () => {
+
+  const fetchUser = useCallback(async () => {
     console.log("running from the auth context");
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await userService.me();
+      console.log("response from the authcontext -->**", res);
       setUser(res.data);
-    } catch {
+    } catch (error: any) {
+      console.log("Error fetching user:", error);
       setUser(null);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // // ✅ Call once on mount to try auto-login
-  // useEffect(() => {
-  //   fetchUser();
-  // }, [fetchUser]);
+  // ✅ Call once on mount to try auto-login
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   const logout = () => {
     setUser(null);

@@ -4,6 +4,7 @@ import { userService } from "../services/user-service";
 
 export const API_CONFIG: AxiosRequestConfig = {
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1",
+  // baseURL: "http://localhost:4000/api/v1",
   timeout: 30000,
   headers: {
     "Content-Type": "application/json",
@@ -38,7 +39,9 @@ export const AxiosResponseInterceptor = (fetchUser: () => Promise<void>) => {
           // Your backend should handle token validation using the httpOnly cookies
           // If the refreshToken is valid, it should set a new accessToken cookie
           await userService.refresh();
-          await fetchUser();
+          if (!originalRequest.url?.includes("/me")) {
+            await fetchUser();
+          }
           console.log("runing from the axiosintercepter");
           return axiosInstance(originalRequest);
         }

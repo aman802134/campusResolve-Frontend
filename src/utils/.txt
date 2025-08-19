@@ -46,7 +46,7 @@ const verificationSeedData = [
     email: 'bob.pgu@example.com',
     role: 'faculty_academic',
     campus: '688fd5cff2bb1f470d43a687',
-    department: '688fdb788b53e4f112bccab4',
+    department: '688fdb788b53e4f112bccab4',//
   },
   {
     externalId: 'PGU-DPT001',

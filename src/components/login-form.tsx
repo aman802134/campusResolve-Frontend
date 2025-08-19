@@ -44,11 +44,11 @@ const LoginForm = () => {
   const { mutate, isError, error, isSuccess, data } = useLoginUser();
   const { login } = useAuth();
   const router = useRouter();
-  console.log("after login : ", data?.data.user.role);
+  console.log("after login : ", data?.user.role);
 
   React.useEffect(() => {
     if (isSuccess && data) {
-      toast.success(data.message || "Login successful!");
+      toast.success("Login successful!");
 
       // Clear the form after successful registration
       form.reset({
@@ -77,7 +77,7 @@ const LoginForm = () => {
 
         // Case 3: Fallback
       } else {
-        toast.error("Registration failed. Please try again.");
+        toast.error("Login failed. Please try again.");
       }
     }
   }, [isError, error]);
@@ -87,9 +87,9 @@ const LoginForm = () => {
     mutate(values, {
       onSuccess: (response) => {
         toast.dismiss(loadingToast);
-        console.log("don't worry reponse got form login form");
-        login(response?.data);
-        RedirectByRole(response?.data?.user?.role, router);
+        console.log("don't worry reponse got form login form", response);
+        login(response);
+        RedirectByRole(response.user.role, router);
       },
       onError: () => {
         toast.dismiss(loadingToast);

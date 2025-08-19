@@ -18,6 +18,11 @@ export const RedirectByRole = async (
     case USER_ROLES.STUDENT:
       router.push("/user");
       break;
+    case USER_ROLES.FACULTY_ACADEMIC:
+      router.push("/user");
+      break;
+    case USER_ROLES.FACULTY_NON_ACADEMIC:
+      router.push("/user");
     default:
       router.push("/");
       break;
