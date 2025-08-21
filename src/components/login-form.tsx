@@ -41,7 +41,7 @@ const LoginForm = () => {
     },
   });
 
-  const { mutate, isError, error, isSuccess, data } = useLoginUser();
+  const { mutate, isError, error, isSuccess, isPending, data } = useLoginUser();
   const { login } = useAuth();
   const router = useRouter();
   console.log("after login : ", data?.user.role);
@@ -196,8 +196,9 @@ const LoginForm = () => {
                   type="submit"
                   variant="secondary"
                   className="w-full gradient text-white hover:opacity-90 transition-colors cursor-pointer"
+                  disabled={isPending}
                 >
-                  Sign In
+                  {isPending ? "Logging in ! please wait" : "Login"}
                 </Button>
               </form>
             </Form>

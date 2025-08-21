@@ -17,7 +17,6 @@ export const ProtectedRoute = ({
 
   useEffect(() => {
     if (loading) return; // ✅ Wait until loading completes
-
     if (!user) {
       router.replace("/login");
     } else if (!allowedRoles.includes(user.role)) {

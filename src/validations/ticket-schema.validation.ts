@@ -1,20 +1,21 @@
-import { z } from 'zod';
-import { PRIORITY, TICKET_STATUS } from '../types/enums';
+import { z } from "zod";
+import { PRIORITY, TICKET_STATUS } from "../types/enums";
+
+export const ISSUE_PRIORITY = z.enum(PRIORITY);
 
 export const createTicketSchema = z.object({
-  title: z.string({ message: 'Title is required' }).trim().min(1),
-  description: z.string({ message: 'Description is required' }).min(1),
+  title: z.string({ message: "Title is required" }).trim().min(1),
+  description: z.string({ message: "Description is required" }).min(1),
 
-  department: z.string({ message: 'Department is required' }).min(1),
-  campus: z.string({ message: 'Campus is required' }).min(1),
+  department: z.string({ message: "Department is required" }).min(1),
+  campus: z.string({ message: "Campus is required" }).min(1),
   domain: z.string().min(1).optional(),
 
   // priority is optional, defaults to 'low' server-side
-  priority: z.enum([PRIORITY.low, PRIORITY.medium, PRIORITY.high, PRIORITY.critical]).optional(),
+  priority: ISSUE_PRIORITY.optional(),
 
-  isSensitive: z.boolean().optional(),
-
-  attachments: z.array(z.string().url({ message: 'Attachment must be a valid URL' })).optional(), // Optionally validate with regex if it's a file/URL
+  isSensitive: z.string().optional(),
+  attachments: z.array(z.instanceof(File).optional()),
 
   escalated: z.boolean().optional(),
   escalationLevel: z.number().int().min(0).max(4).optional(),

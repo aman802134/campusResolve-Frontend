@@ -1,6 +1,6 @@
 // types/admin.types.ts
 
-import { USER_ROLES } from "./enums";
+// import { USER_ROLES } from "./enums";
 import { User } from "./auth.payload";
 
 // Response when assigning/rejecting role

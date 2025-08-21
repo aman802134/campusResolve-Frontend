@@ -12,7 +12,6 @@ export default function Providers({ children }: { children: ReactNode }) {
   function AxiosInterceptorSetup() {
     const { fetchUser } = useAuth();
     useEffect(() => {
-      console.log("running from the provider");
       AxiosResponseInterceptor(fetchUser);
     }, [fetchUser]);
     return null;

@@ -27,8 +27,7 @@ import { GraduationCap, Mail, Lock, User, Phone } from "lucide-react";
 import { registerSchema } from "@/validations/auth-schema.validation";
 import React from "react";
 import { useCreateUser } from "@/lib/hooks/tanstack-querry-hooks";
-import { useCampuses } from "@/lib/hooks/tanstack-querry-hooks";
-import { useDepartments } from "@/lib/hooks/tanstack-querry-hooks";
+import { useCampuses, useDepartments } from "@/lib/hooks/tanstack-querry-hooks";
 import toast from "react-hot-toast";
 import { ValidationErrorResponse } from "@/types/error.types";
 

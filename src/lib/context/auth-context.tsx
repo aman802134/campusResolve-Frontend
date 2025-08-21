@@ -23,14 +23,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const fetchUser = useCallback(async () => {
-    console.log("running from the auth context");
     setLoading(true);
     try {
       const res = await userService.me();
-      console.log("response from the authcontext -->**", res);
       setUser(res.data);
     } catch (error: any) {
-      console.log("Error fetching user:", error);
       setUser(null);
     } finally {
       setLoading(false);

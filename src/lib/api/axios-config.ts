@@ -42,7 +42,6 @@ export const AxiosResponseInterceptor = (fetchUser: () => Promise<void>) => {
           if (!originalRequest.url?.includes("/me")) {
             await fetchUser();
           }
-          console.log("runing from the axiosintercepter");
           return axiosInstance(originalRequest);
         }
       } catch (err: unknown) {

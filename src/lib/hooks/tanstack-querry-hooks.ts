@@ -2,7 +2,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userService } from "../services/user-service";
 import { ticketService } from "../services/ticket-service";
-import { UpdateTicketArgs, UpdateTicketPayload } from "@/types/ticket.types";
+import {
+  TicketResponse,
+  UpdateTicketArgs,
+  UpdateTicketPayload,
+} from "@/types/ticket.types";
 import { departmentService } from "../services/department-service";
 import { updateDomainPayload } from "@/types/department.types";
 import { campusService } from "../services/campus-service";
